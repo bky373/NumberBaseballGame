@@ -59,116 +59,130 @@ public class MainActivity extends AppCompatActivity {
         resultTextView = findViewById(R.id.result_text_view);
         scrollView = findViewById(R.id.scroll_view);
 
-        for(Button getNumButton : numButton)
+        for (Button getNumButton : numButton)
             getNumButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (inputTextCount < 3) {
-                        Button button = findViewById(v.getId());
-                        inputTextView[inputTextCount].setText(button.getText().toString());
-                        button.setEnabled(false);
-                        inputTextCount++;
-                        soundPool.play(buttonSound[2], 1, 1, 1, 0, 1);
-                    } else {
-                        Toast.makeText(getApplicationContext(), "히트 버튼을 눌러주세요.", Toast.LENGTH_SHORT).show();
-                    }
+                    numButtonClick(v);
                 }
             });
 
         backspaceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(inputTextCount > 0) {
-                    int buttonEnableCount = Integer.parseInt(inputTextView[inputTextCount - 1].getText().toString());
-                    numButton[buttonEnableCount].setEnabled(true);
-                    inputTextView[inputTextCount - 1].setText("");
-                    inputTextCount--;
-                    soundPool.play(buttonSound[3], 1, 1, 1, 0, 1);
-                } else {
-                    Toast.makeText(getApplicationContext(), "숫자를 입력해주세요.", Toast.LENGTH_SHORT).show();
-                }
+                backSpaceClick();
             }
         });
 
         hitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (inputTextCount < 3) {
-                    Toast.makeText(getApplicationContext(), "숫자를 입력해주세요.", Toast.LENGTH_SHORT).show();
-                } else {
-                    int[] userNumbers = new int[3];
-                    for (int i = 0; i < userNumbers.length; i++) {
-                        userNumbers[i] = Integer.parseInt(inputTextView[i].getText().toString());
-                    }
-                    int[] countCheck = new int[2];
-                    countCheck = getCountCheck(comNumbers, userNumbers);
-                    Log.e("hitButton", "countCheck = s : " + countCheck[0] + "   b : " + countCheck[1]);
-
-                    String resultCount;
-                    if (countCheck[0] == 3) {
-                        resultCount = hitCount + " ["+ userNumbers[0] + " " + userNumbers[1] + " " + userNumbers[2] + "] 아웃 - 축하합니다.";
-                        soundPool.play(buttonSound[0], 1, 1, 1, 0, 1);
-                    } else {
-                        resultCount = hitCount + " ["+ userNumbers[0] + " " + userNumbers[1] + " " + userNumbers[2] + "] S : "
-                                + countCheck[0] + " B : " + countCheck[1] + "\n";
-                        soundPool.play(buttonSound[4], 1, 1, 1, 0, 1);
-                    }
-                    if (hitCount == 1) {
-                        resultTextView.setText(resultCount);
-                    } else {
-                        resultTextView.append(resultCount);
-                    }
-
-                    if (countCheck[0] == 3) {
-                        hitCount = 1;
-                        comNumbers = getComNumbers();
-                    } else {
-                        hitCount++;
-                    }
-
-                    scrollView.fullScroll(View.FOCUS_DOWN);
-
-                    inputTextCount = 0;
-
-                    for (TextView textView : inputTextView) {
-                        textView.setText("");
-                    }
-
-                    for (Button button : numButton) {
-                        button.setEnabled(true);
-                    }
-                }
+                hitButtonClick();
             }
         });
+    }
+
+    private void hitButtonClick() {
+        if (inputTextCount < 3) {
+            Toast.makeText(getApplicationContext(), "숫자를 입력해주세요.", Toast.LENGTH_SHORT).show();
+        } else {
+            int[] userNumbers = new int[3];
+            for (int i = 0; i < userNumbers.length; i++) {
+                userNumbers[i] = Integer.parseInt(inputTextView[i].getText().toString());
+            }
+            int[] countCheck = getCountCheck(comNumbers, userNumbers);
+            Log.e("hitButton", "countCheck = s : " + countCheck[0] + "   b : " + countCheck[1]);
+
+            String resultCount = getCountString(userNumbers, countCheck);
+
+            if (hitCount == 1) {
+                resultTextView.setText(resultCount);
+            } else {
+                resultTextView.append(resultCount);
+            }
+
+            if (countCheck[0] == 3) {
+                hitCount = 1;
+                comNumbers = getComNumbers();
+            } else {
+                hitCount++;
+            }
+
+            scrollView.fullScroll(View.FOCUS_DOWN);
+
+            for (int i = 0; i < inputTextView.length; i++) {
+                backSpaceClick();
+            }
+//            inputTextCount = 0;
+//            }
+        }
+    }
+
+    private String getCountString(int[] userNumbers, int[] countCheck) {
+        String resultCount;
+        if (countCheck[0] == 3) {
+            resultCount = hitCount + "  [" + userNumbers[0] + " " + userNumbers[1] + " " + userNumbers[2] + "] 아웃 - 축하합니다.";
+            soundPool.play(buttonSound[0], 1, 1, 1, 0, 1);
+        } else {
+            resultCount = hitCount + "  [" + userNumbers[0] + " " + userNumbers[1] + " " + userNumbers[2] + "] S : "
+                    + countCheck[0] + " B : " + countCheck[1] + "\n";
+            soundPool.play(buttonSound[4], 1, 1, 1, 0, 1);
+        }
+        return resultCount;
+    }
+
+    private void backSpaceClick() {
+        if (inputTextCount > 0) {
+            int buttonEnableCount = Integer.parseInt(inputTextView[inputTextCount - 1].getText().toString());
+            numButton[buttonEnableCount].setEnabled(true);
+            inputTextView[inputTextCount - 1].setText("");
+            inputTextCount--;
+            soundPool.play(buttonSound[3], 1, 1, 1, 0, 1);
+        } else {
+            Toast.makeText(getApplicationContext(), "숫자를 입력해주세요.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void numButtonClick(View v) {
+        if (inputTextCount < 3) {
+            Button button = findViewById(v.getId());
+            inputTextView[inputTextCount].setText(button.getText().toString());
+            button.setEnabled(false);
+            inputTextCount++;
+            soundPool.play(buttonSound[2], 1, 1, 1, 0, 1);
+        } else {
+            Toast.makeText(getApplicationContext(), "히트 버튼을 눌러주세요.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private int[] getCountCheck(int[] comNumbers, int[] userNumbers) {
         int[] setCount = new int[2];
         for (int i = 0; i < comNumbers.length; i++) {
             for (int j = 0; j < comNumbers.length; j++) {
-                if(comNumbers[i] == userNumbers[j] && i == j){
-                    setCount[0]++;
-                } else if (comNumbers[i] == userNumbers[j] && i != j) {
-                    setCount[1]++;
+                if (comNumbers[i] == userNumbers[j]) {
+                    if (i == j)
+                        setCount[0]++;
+                    else
+                        setCount[1]++;
                 }
             }
         }
         return setCount;
     }
 
-    public int[] getComNumbers(){
+    public int[] getComNumbers() {
         int[] setComNumbers = new int[3];
         for (int i = 0; i < 3; i++) {
             setComNumbers[i] = new Random().nextInt(10);
             for (int j = 0; j < i; j++) {
-                if(setComNumbers[i] == setComNumbers[j]){
+                if (setComNumbers[i] == setComNumbers[j]) {
                     i--;
                     break;
                 }
             }
         }
 
-        Log.e("setComNumbers","setComNumbers= " + setComNumbers[0] + " " + setComNumbers[1] + " " + setComNumbers[2]);
+        Log.e("setComNumbers", "setComNumbers = " + setComNumbers[0] + ", " + setComNumbers[1] + ", " + setComNumbers[2]);
         return setComNumbers;
     }
 
@@ -191,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         for (int i = 0; i < buttonSound.length; i++) {
-            buttonSound[i] = soundPool.load(getApplicationContext(),R.raw.button_1 + i, 1);
+            buttonSound[i] = soundPool.load(getApplicationContext(), R.raw.button_1 + i, 1);
         }
     }
 
